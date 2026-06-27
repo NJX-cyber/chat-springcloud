@@ -30,13 +30,13 @@
 ## 项目截图
 
 ### 登录界面
-![登录界面](frontend/assest/login.png)
+![登录界面](frontend/assets/login.png)
 
 ### 主界面
-![主界面](frontend/assest/main.png)
+![主界面](frontend/assets/main.png)
 
 ### 后台管理
-![后台管理](frontend/assest/back-stage-management.png)
+![后台管理](frontend/assets/back-stage-management.png)
 
 ---
 
@@ -151,11 +151,11 @@ chat-springcloud/
 │   ├── package.json                        # 依赖与脚本
 │   ├── electron-builder.yml               # Electron 打包配置
 │   ├── electron.vite.config.js            # Vite 构建配置
-│   ├── assest/                            # 项目截图
-│   │   ├── login.png
-│   │   ├── main.png
-│   │   └── back-stage-management.png
-│   ├── assets/                            # 静态资源（字体/图片/视频）
+│   ├── assets/                            # 静态资源 + 项目截图
+│   │   ├── login.png                      # 登录界面截图
+│   │   ├── main.png                       # 主界面截图
+│   │   ├── back-stage-management.png       # 后台管理截图
+│   │   └── ...                            # 字体/图片/视频
 │   ├── resources/                         # 应用图标
 │   ├── build/                             # 构建资源（平台图标/签名配置）
 │   └── src/
