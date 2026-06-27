@@ -1,0 +1,29 @@
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Java
+*.class
+*.jar
+*.war
+target/
+*.log
+
+# Maven
+dependency-reduced-pom.xml
+
+# Node
+node_modules/
+dist/
+.turbo/
+
+# Build output
+out/

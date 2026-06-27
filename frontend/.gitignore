@@ -1,4 +1,8 @@
-**/node_modules/
-**/.vscode/
-**/.idea/
-/chat/chat-java/file/
+node_modules
+dist
+out
+*.log*
+
+# Large binary tools (download separately)
+assets/ffmpeg.exe
+assets/ffprobe.exe

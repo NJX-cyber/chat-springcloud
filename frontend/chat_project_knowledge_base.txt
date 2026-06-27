@@ -1,0 +1,605 @@
+Chat 项目知识库（前后端合并版）
+
+一、项目概览
+
+- 项目名称：chat
+- 前端仓库：chat-front
+- 后端仓库：chat-java
+- 产品形态：Electron 桌面聊天客户端
+- 前端技术栈：Electron、Vue 3、Vite/electron-vite、Element Plus、Pinia、Vue Router、Axios、SQLite、Express、ws、electron-store、fluent-ffmpeg、DPlayer、v-viewer
+- 后端技术栈：Spring Boot、Spring MVC、MyBatis、MySQL、Redis、Netty WebSocket、Redisson、EasyCaptcha、Fastjson
+- 主要能力：登录注册、好友/群聊、消息收发、文件/图片/视频、联系人申请、个人设置、文件管理、版本更新、管理后台、AI 聊天
+
+二、仓库结构与职责
+
+1. chat-front
+- src/main：Electron 主进程，负责窗口、IPC、WebSocket 客户端、本地 SQLite、本地文件服务、窗口管理
+- src/preload：暴露 ipcRenderer
+- src/renderer：Vue 渲染进程，负责页面、组件、路由、状态管理、请求封装
+- assets：ffmpeg、ffprobe、默认图片、视频占位资源
+- build/resources：打包图标与安装资源
+
+2. chat-java
+- src/main/java/com/chat/controller：REST 接口层
+- src/main/java/com/chat/service 与 impl：业务实现层
+- src/main/java/com/chat/websocket：Netty WebSocket 推送与上下线管理
+- src/main/java/com/chat/Redis：Redis 缓存、token、心跳、系统设置、联系人缓存
+- src/main/java/com/chat/entity：PO、DTO、VO、Query
+- src/main/java/com/chat/mapper：MyBatis 接口
+- src/main/resources/com/chat/mapper：MyBatis XML 映射
+
+三、技术与运行特征
+
+- 客户端是 Electron 应用，登录页启动时加载验证码，登录成功后切换到主界面
+- 主界面通过 WebSocket 保持在线状态，并通过本地 SQLite 缓存聊天会话与消息
+- 文件先落到本地，再通过远程后端上传；图片、视频、头像等通过本地 Express 服务提供给前端展示
+- 远程后端负责账号、联系人、群聊、消息、更新、后台管理
+- AI 聊天走独立的流式接口，不同于普通消息发送接口
+
+四、前端工程（chat-front）
+
+1. 启动与构建
+- npm run dev：electron-vite dev
+- npm run build：打包前端资源
+- npm run build:win / build:mac / build:linux：对应平台安装包
+
+2. 关键入口
+- package.json：Electron 入口指向 out/main/index.js
+- src/renderer/src/main.js：Vue 应用入口，注册 Element Plus、Pinia、Router、全局组件与工具
+- src/renderer/src/router/index.js：路由入口
+- src/main/index.js：Electron 主进程入口
+- src/preload/index.js：预加载脚本，向渲染进程注入 ipcRenderer
+
+3. 前端页面结构
+- /login：登录与注册
+- /main：主框架，包含 /chat、/contact、/setting
+- /showMedia：图片、视频、文件预览窗口
+- /admin：管理后台窗口，包含用户、靓号、群组、系统设置、版本管理
+
+4. 登录与初始化流程
+- Login.vue 会先请求验证码接口 /account/checkCode
+- 登录与注册都先校验邮箱、密码、验证码，密码在前端做 md5
+- 登录成功后把 token 存进 localStorage，并通过 IPC 把域名、token、窗口信息传给主进程
+- 主进程在 loginSuccess 之后会启动本地文件服务、初始化 WebSocket、调整窗口尺寸、更新托盘菜单
+- 主界面 Main.vue 会读取本地 serverPort 和系统设置，并监听 reLogin 回跳到登录页
+
+5. 前端主要页面职责
+- Chat.vue：会话列表、消息列表、顶部置顶、删除会话、加载历史消息、滚动分页、未读数、消息搜索、群聊详情、媒体窗口
+- MessageSend.vue：普通消息发送、表情、文件上传、拖拽文件、粘贴图片、剪贴板文件保存
+- MessageSendToAI.vue：AI 流式聊天，使用 SSE 方式接收增量内容
+- Contact.vue：联系人分组展示、新朋友、我的群聊、我加入的群聊、我的好友、联系人搜索
+- UserInfo.vue / UserInfoEdit.vue / UserInfoPassword.vue：个人资料、头像、密码修改、退出登录
+- FileManager.vue：修改默认文件保存路径、打开本地文件目录
+- Update.vue：检查版本、显示更新内容、下载更新或打开外链
+- Admin 子页面：用户管理、靓号管理、群组管理、系统设置、版本管理
+
+6. 前端核心组件
+- Layout.vue：左右布局容器
+- WinOP.vue：窗口置顶、最小化、最大化、关闭
+- Avatar.vue / AvatarBase.vue：头像展示、联系人卡片、头像预览
+- ShowLocalImage.vue：本地文件服务图片加载
+- Table.vue：Element Plus 表格与分页封装
+- Dialogue.vue：弹窗封装
+- Badge.vue：未读角标
+- UserBaseInfo.vue：用户信息卡片
+
+7. 前端状态管理
+- GlobalInfoStore：全局信息，如 localServerPort、token 等
+- UserInfoStore：当前登录用户信息，写入 localStorage
+- SysSettingStore：系统设置，例如上传大小限制
+- MessageCountStore：chatCount、contactApplyCount 等徽标计数
+- ContactStateStore：联系人页刷新触发器
+- AvatarUpdateStore：头像强制刷新标记
+
+8. 前端请求与工具
+- src/renderer/src/utils/request.js：统一 Axios 封装，自动带 token，统一处理 loading 与错误
+- src/main/request.js：主进程侧的 Axios 封装，主要用于上传/下载流
+- src/renderer/src/utils/api.js：前端 API 常量与域名配置
+- src/renderer/src/utils/verify.js：邮箱、密码、版本号、数字校验
+- src/renderer/src/utils/utils.js：日期、大小格式化
+- src/renderer/src/utils/message.js：ElMessage 封装
+- src/renderer/src/utils/confirm.js：确认框封装
+- src/renderer/src/utils/Constants.js：文件类型映射
+
+五、前端与主进程协作
+
+1. 预加载与 IPC
+- preload 直接暴露 window.ipcRenderer
+- 渲染进程通过 window.ipcRenderer.send / on / once 与主进程交互
+
+2. 主要 IPC 通道
+- loginOrRegister：切换登录/注册窗口高度
+- loginSuccess：登录成功后初始化用户、数据库、WebSocket 和窗口状态
+- winTitleOp：窗口关闭、最小化、最大化、置顶
+- setLocalStore / getLocalStore：读写 electron-store
+- loadSessionData：读取本地会话列表
+- delChatSession：删除本地会话
+- topChatSession：置顶/取消置顶会话
+- loadChatMessage：读取本地消息分页
+- setSessionSelect：记录当前选中的会话并清空对应未读
+- addLocalMessage：把发送成功的消息写入本地 SQLite
+- createCover：生成头像或视频封面
+- newWindow：打开独立子窗口
+- saveFile：另存为本地文件
+- saveClipBoardFile：保存剪贴板图片到临时目录
+- loadContactApply：读取联系人申请未读数
+- updateContactNoReadCount：清空联系人申请未读数
+- reLogin：重新登录，关闭 WS 与本地文件服务
+- openLocalFolder：打开本地文件目录
+- getSystemSetting：读取本地文件夹配置
+- changeLocalFolder：修改文件保存目录
+- reloadChatSession：联系人被重新拉回会话列表
+- downloadUpdate：下载安装包
+- openUrl：打开外链
+- loadLocalUser：读取本地历史登录用户邮箱
+
+3. 子窗口数据传递
+- openWindow 会把 localServerPort 注入到 pageInitData
+- showMedia 与 admin 页面都会监听 pageInitData
+
+六、本地后台与桌面端主进程（chat-front/src/main）
+
+1. index.js 职责
+- 创建主窗口
+- 创建托盘菜单
+- 注册所有 IPC 监听
+- 控制登录/注册/主界面窗口尺寸
+- 在开发环境打开 DevTools
+- 点击托盘图标恢复窗口
+
+2. 窗口行为
+- 登录窗口默认较小，注册态更高
+- 登录成功后主窗口变成 850x800
+- 如果用户是管理员，托盘菜单额外增加“管理后台”
+- reLogin 时恢复到登录窗口大小并断开连接
+
+3. windowProxy.js
+- 用内存对象管理多个 BrowserWindow
+- 以 windowId 作为键保存、读取与关闭窗口
+
+4. store.js
+- 基于 electron-store
+- 全局键：devDomain、prodDomain、devWsDomain、prodWsDomain 等
+- 用户级键：token、localServerPort、localFileFolder、currentSessionId
+
+5. listen-ipc.js
+- 所有主进程 IPC 入口集中在这里
+- 登录成功后会 addUserSetting、initWs，并通知渲染进程 loginSuccessCallBack
+- addLocalMessage 会把消息写入本地 SQLite，文件消息还会落本地文件
+- openWindow 会把 localServerPort 带进子窗口初始化数据
+
+6. wsClient.js
+- 负责连接远程 WebSocket
+- 通过 token 拼接 ws URL
+- onopen 时发送心跳
+- onmessage 时根据 messageType 分发并同步本地 SQLite
+- 支持重连，最多 5 次，间隔 5 秒
+- 收到强制下线消息后会主动关闭
+
+7. file.js
+- 负责本地 Express 文件服务
+- 负责媒体封面生成、文件下载、文件另存为、剪贴板文件落盘、打开文件夹、修改文件目录
+- 依赖 ffmpeg.exe 与 ffprobe.exe
+- 支持视频封面、HEVC 转码、范围请求播放
+
+8. SQLite 数据库
+- 数据库路径：用户目录下的 .chat 或 .chattest
+- 开发环境：~/.chattest/local.db
+- 生产环境：~/.chat/local.db
+- ADB.js 会在启动时自动建表、建索引，并把数据库字段转换成 camelCase
+- Tables.js 里定义了 chat_message、chat_session_user、user_setting 三张本地表
+
+9. 本地数据库表
+- chat_message：messageId、sessionId、messageType、messageContent、contactType、sendUserId、sendUserNickName、sendTime、status、fileSize、fileName、filePath、fileType
+- 主键：(message_id, user_id)
+- 索引：session_id
+- chat_session_user：userId、contactId、contactType、sessionId、status、contactName、lastMessage、lastReceiveTime、noReadCount、memberCount、topType
+- 主键：(user_id, contact_id)
+- user_setting：userId、email、sysSetting、contactNoRead、serverPort
+- 主键：user_id
+
+七、前端本地文件访问
+
+- 本地图片/视频/文件不是直接读后端地址，而是通过本地 Express 服务访问
+- URL 形式：http://127.0.0.1:<localServerPort>/file?fileId=...&partType=...&fileType=...&showCover=...&forceGet=...&t=时间戳
+- partType 主要有 avatar、chat、tmp
+- avatar 文件存为 <localFileFolder>/avatar/<fileId>.png
+- chat 文件按发送月份存到 <localFileFolder>/<YYYYMM>/<messageId>.<suffix>
+- tmp 目录用于剪贴板/临时文件
+- ShowLocalImage 负责在头像、图片、视频封面等场景加载本地服务资源
+
+八、后端工程（chat-java）
+
+1. 启动与配置
+- Java 8
+- Spring Boot 2.2.6.RELEASE
+- Web 端口：8088
+- WebSocket 端口：5051
+- context-path：/api
+- MySQL：chat 库
+- Redis：用于验证码、token、心跳、系统设置、联系人缓存
+- 项目启动后会先检查数据库与 Redis，再启动 Netty WebSocket
+
+2. 启动入口
+- ChatApplication：Spring Boot 主类
+- InitRun：ApplicationRunner，负责启动时初始化数据库连接、Redis 连接、WebSocket 服务
+
+3. 配置类
+- AppConfig：读取 ws.port、project.folder、admin.emails
+- Constants：集中定义 Redis key、文件夹、消息常量、更新常量、文件后缀
+
+4. 统一返回与拦截
+- BaseController 提供统一成功响应
+- BaseController 从请求头 token 中读取当前用户信息
+- GlobalInterceptor 用于登录鉴权与管理员鉴权
+
+5. 后端核心控制器
+
+AccountController /account
+- /checkCode：获取验证码
+- /register：注册
+- /login：登录
+- /systemSettings：获取系统设置
+- /test：测试消息推送
+
+UserInfoController /userInfo
+- /getUserInfo：获取当前用户信息
+- /updateUserInfo：修改个人资料与头像
+- /updateUserPassword：修改密码
+- /logout：退出登录并关闭连接
+
+UserContactController /userContact
+- /search：搜索联系人或群
+- /applyAdd：申请加好友或加群
+- /loadApply：加载申请列表
+- /dealWithApply：处理申请
+- /loadContact：加载好友/群聊列表
+- /getContactInfo：获取联系人公开信息
+- /getUserContactInfo：获取联系人详情
+- /delUserContact：删除好友
+- /blacklistUserContact：拉黑好友
+
+GroupInfoController /groupInfo
+- /saveGroup：创建或编辑群聊
+- /loadMyGroup：加载我创建的群
+- /getGroupInfo：群详情
+- /getGroupInfo4Chat：聊天页群详情
+- /addOrRemoveGroupMember：群成员增删
+- /leaveGroup：退出群聊
+- /dissolutionGroup：解散群聊
+
+ChatController /chat
+- /sendMessage：发送消息
+- /deleteMessage：删除消息
+- /uploadFile：上传文件
+- /downloadFile：下载文件
+
+UpdateController /systemVersion
+- /checkVersion：检查更新
+
+AdminUserInfoController /admin
+- /loadUser：用户管理列表
+- /updateUserStatus：启用/禁用用户
+- /forceOffLine：强制下线
+
+AdminUserInfoBeautyController /admin
+- /loadBeautyAccountList：靓号列表
+- /saveBeautyAccount：新增或修改靓号
+- /delBeautyAccount：删除靓号
+
+AdminSettingController /admin
+- /getSysSetting：读取系统设置
+- /saveSysSetting：保存系统设置和机器人头像/封面
+
+AdminGroupController /admin
+- /loadGroup：群管理列表
+- /dissolutionGroup：管理员解散群
+
+AdminAppUpdateController /admin
+- /loadUpdateList：版本列表
+- /saveUpdate：保存版本
+- /delUpdate：删除版本
+- /postUpdate：发布版本（含灰度发布）
+
+UserContactApplyController /userContactApply
+- 这是联系人申请的通用 CRUD 控制器，更多是后台/内部用法，前端主流程更常用 /userContact 下的接口
+
+6. 后端服务实现的职责
+- UserInfoServiceImpl：注册、登录、用户状态更新、强制下线
+- UserContactServiceImpl：联系人查询、添加、删除、拉黑、好友详情
+- UserContactApplyServiceImpl：申请加好友/加群、处理申请
+- GroupInfoServiceImpl：创建群、群成员增删、退群、解散群
+- ChatMessageServiceImpl：消息保存、文件上传、文件下载、机器人回复、消息删除
+- AppUpdateServiceImpl：版本保存、发布、灰度逻辑、最新版本获取
+- UserInfoBeautyServiceImpl：靓号管理
+- ChatSessionUserServiceImpl / ChatSessionServiceImpl：会话与会话用户数据维护
+
+7. 后端 Redis 职责
+- RedisComponent 管理验证码、token、心跳、系统设置、用户联系人列表
+- RedisUtils 是底层 RedisTemplate 封装
+- 心跳 key：chat:ws:user:heartbeat:<userId>
+- token key：chat:ws:user:token:<token>
+- userId -> token key：chat:ws:user:id:<userId>
+- 系统设置 key：chat:systemSettings
+- 联系人列表 key：chat:ws:user:contact<userId>
+
+8. 后端消息与推送
+- MessageHandle 使用 Redis topic：message.topic
+- 业务代码先 publish 到 Redis，再由监听器统一转发给在线用户
+- ChannelContextUtils 维护用户连接与群连接，并负责把消息写到 Netty Channel
+- Netty WebSocket 服务监听 /ws，握手时从 URL token 取出登录态
+
+9. WebSocket 初始化与推送逻辑
+- 用户登录后，前端把 token 传给主进程，主进程再连 WebSocket
+- 连接建立后，后端会把当前会话、离线后消息、申请数量一次性打包为 WsInitData
+- Init 消息类型是 0
+- 连接存活期间，心跳会刷新 Redis 中的在线状态
+- 断开后会写最近离线时间
+
+10. WebSocket 消息类型
+- 0 INIT：初始化同步，携带会话列表、消息列表、申请数
+- 1 ADD_FRIEND：添加好友成功
+- 2 CHAT：普通聊天消息
+- 3 GROUP_CREATE：群创建成功
+- 4 CONTACT_APPLY：好友申请消息
+- 5 MEDIA_CHAT：图片、视频、文件消息
+- 6 FILE_UPLOAD：文件上传完成
+- 7 FORCE_OFF_LINE：强制下线
+- 8 DISSOLUTION_GROUP：群解散
+- 9 ADD_GROUP：加入群聊
+- 10 CONTACT_NAME_UPDATE：修改群名/联系人名
+- 11 LEAVE_GROUP：退出群聊
+- 12 REMOVE_GROUP：被移出群聊
+- 13 ADD_FRIEND_SELF：给自己看的好友申请提示
+- 14 MESSAGE_ERROR：消息异常/删除消息等错误状态
+
+11. 联系人类型与状态
+- UserContactTypeEnum.USER：好友，前缀 U
+- UserContactTypeEnum.GROUP：群聊，前缀 G
+- UserContactStatusEnum.FRIEND：好友
+- UserContactStatusEnum.NOT_FIEND：非好友
+- UserContactStatusEnum.DEL / DEL_BY：删除关系
+- UserContactStatusEnum.BLACKLIST / BLACKLIST_BY：拉黑关系
+- UserContactStatusEnum.BLACKLIST_BY_FIRST：刚建立关系即被拉黑
+
+12. 群状态
+- GroupStatusEnum.NORMAL：正常
+- GroupStatusEnum.DISSOLUTION：已解散
+
+13. 用户状态
+- UserStatusEnum.ENABLE：启用
+- UserStatusEnum.DISABLE：禁用
+
+14. 申请状态
+- UserContactApplyStatusEnum.INIT：待处理
+- UserContactApplyStatusEnum.PASS：已同意
+- UserContactApplyStatusEnum.REJECT：已拒绝
+- UserContactApplyStatusEnum.BLACKLIST：已拉黑
+
+15. 版本更新状态
+- AppUpdateStatusEnum.INIT：未发布
+- AppUpdateStatusEnum.GRAYSCALE：灰度发布
+- AppUpdateStatusEnum.ALL：全网发布
+- AppUpdateFileTypeEnum.LOCAL：本地安装包
+- AppUpdateFileTypeEnum.OUT_LINK：外链
+
+16. 统一错误码
+- 200：成功
+- 400：网络波动，请重试
+- 404：请求地址不存在
+- 500：服务器错误
+- 600：请求参数错误
+- 601：信息已存在
+- 602：文件不存在
+- 603：文件过大，上传失败
+- 901：登录超时
+- 902：不是对方好友，请先发送好友申请
+- 903：你已不在群聊中，请重新申请加入
+
+九、后端数据对象
+
+1. 核心 PO
+- UserInfo
+- UserContact
+- UserContactApply
+- GroupInfo
+- ChatSession
+- ChatSessionUser
+- ChatMessage
+- AppUpdate
+
+2. 核心 DTO/VO
+- TokenUserInfoDto：token、userId、nickname、admin
+- MessageSendDto：消息传输对象，既用于 REST 发送，也用于 WebSocket 推送
+- WsInitData：首次连接时下发的会话、消息、申请数
+- SystemSettingsDto：系统设置
+- ContactInfoVO：联系人/群的详情展示对象
+- GroupInfoVO：群详情 + 群成员列表
+- AppUpdateVO：更新展示对象
+- ResponseVO：统一响应
+- PaginationResultVO：分页响应
+- CheckCodeVO：验证码结果
+
+十、数据与业务流
+
+1. 登录流程
+- 前端获取验证码
+- 前端提交邮箱、密码、验证码
+- 后端校验验证码和密码
+- 登录成功后生成 token，保存到 Redis
+- 前端把 token 存到 localStorage，主进程把 token 存到 electron-store
+
+2. 消息发送流程
+- 前端先调 /chat/sendMessage 获取消息入库结果
+- 成功后把消息对象发给主进程 addLocalMessage
+- 主进程写入本地 SQLite
+- 后端通过 Redis topic + Netty 推送给在线用户
+
+3. 文件消息流程
+- 前端选择文件、拖拽文件或粘贴图片
+- 先把消息发到后端，拿到 messageId
+- 再把文件上传到 /chat/uploadFile
+- 后端保存到项目目录下的文件系统
+- 本地客户端通过本地 Express 服务访问文件或封面
+
+4. 联系人申请流程
+- 搜索联系人后点击申请
+- /userContact/applyAdd 生成申请记录
+- 对方上线时会收到申请未读数
+- /userContact/dealWithApply 处理同意或拒绝
+
+5. 群聊流程
+- 群主可创建群、增删成员、修改群信息
+- 普通成员可退群
+- 群解散后所有成员关系与会话状态会同步调整
+
+6. 更新流程
+- 前端点击检查更新
+- /systemVersion/checkVersion 返回最新版本和更新描述
+- 管理后台通过 /admin/saveUpdate 保存版本
+- /admin/postUpdate 控制发布状态与灰度 UID
+
+十一、消息内容与前端展示规则
+
+- 普通文本消息 messageType=2
+- 图片、视频、文件消息 messageType=5
+- 系统消息类型会单独走 ChatMessageSys 组件
+- 消息间隔超过 5 分钟时，前端会插入时间分割条
+- Chat.vue 会按 topType 和 lastReceiveTime 排序会话
+- 未读数通过 MessageCountStore 在左侧角标上显示
+
+十二、AI 聊天
+
+- AI 聊天在前端通过 MessageSendToAI.vue 处理
+- 请求接口：/api/agent/chat
+- 方式：SSE 流式接收
+- 发送参数：memoryId、question
+- 聊天历史接口：/agent/history
+- AI 聊天接入的机器人联系人 ID 为 Urobot
+
+十三、常见前端请求接口（按模块整理）
+
+1. 账号与系统
+- /account/checkCode：验证码
+- /account/login：登录
+- /account/register：注册
+- /account/systemSettings：获取系统设置
+- /userInfo/getUserInfo：当前用户信息
+- /userInfo/updateUserInfo：修改用户资料
+- /userInfo/updateUserPassword：修改密码
+- /userInfo/logout：退出登录
+
+2. 联系人
+- /userContact/search：搜索
+- /userContact/applyAdd：申请添加
+- /userContact/loadApply：加载申请
+- /userContact/dealWithApply：处理申请
+- /userContact/loadContact：加载联系人
+- /userContact/getContactInfo：联系人公开信息
+- /userContact/getUserContactInfo：联系人详情
+- /userContact/delUserContact：删除好友
+- /userContact/blacklistUserContact：拉黑好友
+
+3. 群聊
+- /groupInfo/saveGroup：保存群聊
+- /groupInfo/loadMyGroup：我的群聊
+- /groupInfo/getGroupInfo：群详情
+- /groupInfo/getGroupInfo4Chat：聊天页群详情
+- /groupInfo/addOrRemoveGroupMember：群成员增删
+- /groupInfo/leaveGroup：退群
+- /groupInfo/dissolutionGroup：解散群
+
+4. 聊天
+- /chat/sendMessage：发送消息
+- /chat/deleteMessage：删除消息
+- /chat/uploadFile：上传文件
+- /chat/downloadFile：下载文件
+
+5. 版本更新
+- /systemVersion/checkVersion：检查版本
+- /admin/loadUpdateList：版本列表
+- /admin/saveUpdate：保存版本
+- /admin/delUpdate：删除版本
+- /admin/postUpdate：发布版本
+
+6. 管理后台
+- /admin/loadUser：用户列表
+- /admin/updateUserStatus：启用/禁用用户
+- /admin/forceOffLine：强制下线
+- /admin/loadBeautyAccountList：靓号列表
+- /admin/saveBeautyAccount：保存靓号
+- /admin/delBeautyAccount：删除靓号
+- /admin/getSysSetting：系统设置
+- /admin/saveSysSetting：保存系统设置
+- /admin/loadGroup：群列表
+- /admin/dissolutionGroup：管理员解散群
+
+十四、前端文件下载与展示
+
+- AvatarBase 和 ShowLocalImage 通过本地文件服务读取头像/封面/文件缩略图
+- showMedia 窗口可以：
+  - 浏览图片
+  - 播放视频
+  - 下载文件
+  - 上一张/下一张切换
+  - 图片缩放、旋转、原始大小切换
+- 文件下载会走主进程 saveFile，由系统弹窗另存为
+
+十五、系统设置与文件目录
+
+- 后端系统设置保存在 Redis
+- 前端 FileManager 可以修改默认文件目录
+- 文件目录修改后，主进程会把旧目录内容复制到新目录
+- 机器人头像文件保存在项目目录的 file/avatar 下
+- 系统设置包括：
+  - maxGroupCount
+  - maxGroupMemberCount
+  - maxImageSize
+  - maxVideoSize
+  - maxFileSize
+  - robotUid
+  - robotNickName
+  - robotWelcome
+
+十六、打包与资源
+
+- chat-front 使用 electron-builder 打包桌面程序
+- 资源包含图标、默认图片、ffmpeg、ffprobe
+- Windows 安装包输出到 installPackages
+- Mac/Windows/Linux 都有打包脚本
+
+十七、扩展与维护建议
+
+- 新增前端接口时，优先在 src/renderer/src/utils/api.js 中集中定义
+- 新增主进程能力时，优先在 src/main/listen-ipc.js 注册 IPC
+- 新增本地缓存表时，优先同步修改 src/main/db/Tables.js、ADB.js 相关映射和业务模型
+- 新增后端 REST 接口时，优先在 controller/service/mapper 三层同步补齐
+- 新增 WebSocket 消息类型时，需要同时更新后端枚举、推送逻辑和前端 receiveMessage 处理
+
+十八、快速定位建议
+
+- 想看前端路由：src/renderer/src/router/index.js
+- 想看登录逻辑：src/renderer/src/views/Login.vue
+- 想看聊天逻辑：src/renderer/src/views/chat/Chat.vue、MessageSend.vue、MessageSendToAI.vue
+- 想看联系人逻辑：src/renderer/src/views/contact/Contact.vue
+- 想看主进程：src/main/index.js、listen-ipc.js、wsClient.js、file.js
+- 想看本地数据库：src/main/db/*
+- 想看后端接口：chat-java/src/main/java/com/chat/controller/*
+- 想看后端 WebSocket：chat-java/src/main/java/com/chat/websocket/*
+- 想看后端配置：chat-java/src/main/resources/application.properties
+
+十九、补充说明
+
+- 这个项目的“后端”实际上分两层：
+  1. 远程服务端 chat-java，负责正式业务数据与 WebSocket 推送
+  2. 桌面端主进程 chat-front/src/main，负责本地缓存、文件服务、窗口与 IPC
+- 如果后续要做知识库检索，建议把这份 txt 作为总索引，再按“前端页面、主进程、后端接口、WebSocket、数据库、更新、文件”拆分成多个子文件
+
+二十、关键词速查
+
+- 登录：验证码 + md5 + token + Redis
+- 消息：REST 入库 + WebSocket 推送 + 本地 SQLite 缓存
+- 文件：先上传，再本地服务展示
+- 联系人：好友申请、好友详情、黑名单、群聊成员
+- 更新：版本检查、灰度发布、外链或本地安装包
+- 管理后台：用户、靓号、群组、系统设置、版本管理
