@@ -574,7 +574,7 @@ gateway              :8800     API 网关
 user-info-manager    :8088     用户管理
 chat-message-manager :8089     消息管理 + :5051 WebSocket
 chat-agent           :8090     AI 智能体
-mysql                :3307     数据库
+mysql                :3306     数据库
 redis                :6379     缓存
 mongo                :27017    文档存储
 nacos                :8848     注册中心
