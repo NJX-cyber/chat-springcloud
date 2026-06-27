@@ -1,0 +1,36 @@
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+      routes:
+        # ========== user-info-manager 微服务 ==========
+        - id: user-info-route
+          uri: lb://user-info-manager
+          predicates:
+            - Path=/api/account/**, /api/groupInfo/**, /api/userContact/**, /api/userInfo/**, /api/admin/**, /api/systemVersion/**, /api/userContactApply/**
+          filters:
+            - RewritePath=/api/?(?<segment>.*),/$\{segment}
+
+        # ========== chat-message-manager 微服务 ==========
+        - id: chat-message-route
+          uri: lb://chat-message-manager
+          predicates:
+            - Path=/api/chat/**
+          filters:
+            - RewritePath=/api/?(?<segment>.*),/$\{segment}
+
+        # ========== chat-agent 微服务 ==========
+        - id: chat-agent-route
+          uri: lb://chat-agent
+          predicates:
+            - Path=/api/agent/**
+          filters:
+            - RewritePath=/api/?(?<segment>.*),/$\{segment}
+
+#      default-filters:
+#        - RewritePath=/api/?(?<segment>.*),/$\{segment}

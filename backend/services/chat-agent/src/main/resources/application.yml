@@ -1,0 +1,136 @@
+# ===== Spring Boot 标准配置 =====
+server:
+  port: 8090
+
+spring:
+  profiles:
+    active: test
+    include: feign
+  application:
+    name: chat-agent
+  data:
+    mongodb:
+      uri: mongodb://admin:${password}@43.108.55.149:27017/chat_memory_db?authSource=admin&maxIdleTimeMS=20000&heartbeatFrequencyMS=10000&serverSelectionTimeoutMS=5000&connectTimeoutMS=5000&socketTimeoutMS=60000&maxPoolSize=20&minPoolSize=1
+      auto-index-creation: true
+    redis:
+      database: 0
+      host: 43.108.55.149
+      port: 6379
+      password: ${password}
+      timeout: 8000ms
+      connect-timeout: 8000ms
+      lettuce:
+        pool:
+          max-active: 20
+          max-idle: 10
+          min-idle: 1
+          max-wait: 5000ms
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 43.108.55.149:8848
+      config:
+        server-addr: 43.108.55.149:8848
+        namespace: ${spring.profiles.active:public}
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/chat?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true&zeroDateTimeBehavior=convertToNull
+    username: root
+    password: ${password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  task:
+    execution:
+      pool:
+        core-size: 2
+        max-size: 5
+        queue-capacity: 50
+      thread-name-prefix: agent-async-
+
+# ===== MyBatis-Plus 配置 =====
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# ===== LangChain4j 配置 =====
+langchain4j:
+  community:
+    dashscope:
+
+      chat-model:
+        api-key: ${aliQwen-api}
+        model-name: qwen-max
+
+      embedding-model:
+        api-key: ${aliQwen-api}
+        model-name: text-embedding-v3
+
+      streaming-chat-model:
+        api-key: ${aliQwen-api}
+        model-name: qwen-plus
+
+    redis:
+      host: 43.108.55.149
+      port: 6379
+      password: ${password}
+      dimension: 1024
+      index-name: xiaozhi_index
+      prefix: "xiaozhi_prefix:"
+
+# ===== 日志 =====
+logging:
+  level:
+    root: info
+
+# ===== Resilience4j 韧性防护 =====
+resilience4j:
+  circuitbreaker:
+    instances:
+      llm-chat:
+        sliding-window-size: 10
+        minimum-number-of-calls: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 2
+        automatic-transition-from-open-to-half-open-enabled: true
+      cb-comm:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 2
+        automatic-transition-from-open-to-half-open-enabled: true
+  timelimiter:
+    instances:
+      llm-chat:
+        timeout-duration: 30s
+  # 限流配置
+  ratelimiter:
+    instances:
+      lim-comm:
+        limit-for-period: 10                # 每周期允许 10 个请求
+        limit-refresh-period: 1s            # 周期为 1 秒
+        timeout-duration: 0ms               # 不等待，限流即拒绝
+
+---
+spring:
+  config:
+    import: optional:nacos:common.properties?group=chat-agent
+    activate:
+      on-profile: dev
+
+---
+
+spring:
+  config:
+    import: optional:nacos:common.properties?group=chat-agent
+    activate:
+      on-profile: test
+
+---
+
+spring:
+  config:
+    import: optional:nacos:common.properties?group=chat-agent
+    activate:
+      on-profile: prod

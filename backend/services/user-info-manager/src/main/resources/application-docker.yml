@@ -1,0 +1,33 @@
+# ===== Docker 环境覆盖配置 =====
+# 启动方式: java -jar app.jar --spring.profiles.active=docker
+# 所有 IP 地址替换为 Docker compose 服务名
+
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: nacos:8848
+      config:
+        server-addr: nacos:8848
+        import-check:
+          enabled: false
+  config:
+    import: optional:nacos:common.properties?group=chat-agent
+  datasource:
+    url: jdbc:mysql://mysql:3306/chat?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true&zeroDateTimeBehavior=convertToNull
+  data:
+    redis:
+      host: redis
+      port: 6379
+      password: ${password}
+      timeout: 8000ms
+      connect-timeout: 8000ms
+      lettuce:
+        pool:
+          max-active: 20
+          max-idle: 10
+          min-idle: 1
+          max-wait: 5000ms
+
+project:
+  folder: /app/data
