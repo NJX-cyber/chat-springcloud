@@ -429,49 +429,51 @@ onUnmounted(() => {
 .login-card {
   position: relative;
   z-index: 1;
-  width: 380px;
+  width: 280px;
+  min-height: fit-content;
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(20px) saturate(180%);
-  border-radius: 20px;
+  border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 
     0 25px 50px rgba(0, 0, 0, 0.15),
     0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin: 15px 0;
 }
 
 /* ===== 卡片头部 ===== */
 .card-header {
-  padding: 35px 30px 20px;
+  padding: 22px 24px 14px;
   text-align: center;
 
   .logo-area {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    margin-bottom: 12px;
+    gap: 10px;
+    margin-bottom: 8px;
   }
 
   .logo-icon {
-    width: 46px;
-    height: 46px;
-    border-radius: 14px;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
     background: linear-gradient(135deg, #6366f1, #8b5cf6);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
+    box-shadow: 0 6px 15px rgba(99, 102, 241, 0.35);
 
     .iconfont {
-      font-size: 26px;
+      font-size: 22px;
       color: #fff;
     }
   }
 
   .app-title {
-    font-size: 26px;
+    font-size: 22px;
     font-weight: 700;
     color: #1f2937;
     margin: 0;
@@ -479,7 +481,7 @@ onUnmounted(() => {
   }
 
   .app-subtitle {
-    font-size: 13px;
+    font-size: 12px;
     color: #9ca3af;
     margin: 0;
     letter-spacing: 0.3px;
@@ -488,33 +490,33 @@ onUnmounted(() => {
 
 /* ===== 卡片主体 ===== */
 .card-body {
-  padding: 0 30px 30px;
+  padding: 0 24px 20px;
 }
 
 /* ===== 错误提示 ===== */
 .error-msg {
   background: linear-gradient(135deg, #fef2f2, #fee2e2);
   color: #dc2626;
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-size: 13px;
-  margin-bottom: 16px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   border: 1px solid #fecaca;
   animation: shakeIn 0.4s ease;
 
   .error-icon {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     background: #ef4444;
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     flex-shrink: 0;
   }
@@ -532,12 +534,12 @@ onUnmounted(() => {
 :deep(.custom-input) {
   .el-input__wrapper {
     background: #f8f7ff;
-    border-radius: 12px;
+    border-radius: 10px;
     border: 2px solid transparent;
     box-shadow: none;
-    padding-left: 12px;
-    padding-right: 12px;
-    height: 46px;
+    padding-left: 10px;
+    padding-right: 10px;
+    height: 40px;
     transition: all 0.25s ease;
 
     &:hover {
@@ -548,13 +550,13 @@ onUnmounted(() => {
     &.is-focus {
       background: #fff;
       border-color: #6366f1;
-      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
     }
   }
 
   .el-input__inner {
     color: #1f2937;
-    font-size: 14px;
+    font-size: 13px;
 
     &::placeholder {
       color: #c4b5fd;
@@ -568,12 +570,12 @@ onUnmounted(() => {
 
 .input-icon {
   color: #a78bfa;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 /* ===== 表单项 ===== */
 :deep(.el-form-item) {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 
   .el-form-item__content {
     width: 100%;
@@ -640,7 +642,7 @@ onUnmounted(() => {
 
     .check-code-img {
       display: block;
-      height: 46px;
+      height: 40px;
       width: auto;
     }
 
@@ -663,24 +665,24 @@ onUnmounted(() => {
 /* ===== 提交按钮 ===== */
 .submit-btn {
   width: 100%;
-  height: 48px;
+  height: 42px;
   border: none;
-  border-radius: 14px;
+  border-radius: 12px;
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   color: #fff;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: 4px;
   cursor: pointer;
-  margin-top: 8px;
+  margin-top: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
 
   &::before {
     content: '';
@@ -693,7 +695,7 @@ onUnmounted(() => {
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 35px rgba(99, 102, 241, 0.45);
+    box-shadow: 0 10px 28px rgba(99, 102, 241, 0.45);
 
     &::before {
       opacity: 1;
@@ -706,7 +708,7 @@ onUnmounted(() => {
 
   &:active {
     transform: translateY(0);
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
   }
 
   span {
@@ -716,8 +718,8 @@ onUnmounted(() => {
 }
 
 .btn-arrow {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   position: relative;
   z-index: 1;
   transition: transform 0.3s ease;
