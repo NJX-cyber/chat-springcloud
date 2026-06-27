@@ -1,0 +1,5 @@
+# ===== Docker 环境覆盖配置 =====
+spring:
+  cloud:
+    nacos:
+      server-addr: nacos:8848

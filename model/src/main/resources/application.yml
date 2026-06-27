@@ -1,0 +1,42 @@
+# websocket端口
+ws:
+  port: 5051
+
+spring:
+  mvc:
+    # 处理favicon
+    favicon:
+      enable: false
+  web:
+    resources:
+      add-mappings: false
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 200MB
+  # redis配置
+  data:
+    redis:
+      database: 0
+      host: 43.108.55.149
+      password: ${password}
+      port: 6379
+      timeout: 8000ms
+      connect-timeout: 8000ms
+      lettuce:
+        pool:
+          max-active: 20
+          max-idle: 10
+          min-idle: 1
+          max-wait: 5000ms
+
+# 项目目录
+project:
+  folder: D:/develop/IDEA/JavaProject/chat/chat-java/
+
+
+
+# 超级管理员ID
+admin:
+  emails: test@qq.com
+
