@@ -1,0 +1,4 @@
+**/node_modules/
+**/.vscode/
+**/.idea/
+/chat/chat-java/file/
