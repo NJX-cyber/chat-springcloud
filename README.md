@@ -30,13 +30,13 @@
 ## 项目截图
 
 ### 登录界面
-![登录界面](frontend/assets/login.png)
+![登录界面](frontend/assets/登录页面.png)
 
 ### 主界面
-![主界面](frontend/assets/main.png)
+![主界面](frontend/assets/主界面.png)
 
 ### 后台管理
-![后台管理](frontend/assets/back-stage-management.png)
+![后台管理](frontend/assets/管理后台.png)
 
 ---
 
