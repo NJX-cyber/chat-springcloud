@@ -14,8 +14,8 @@ import { saveWindow } from './windowProxy'
 
 
 const login_width = 300
-const login_height = 370
-const register_height = 490
+const login_height = 420
+const register_height = 520
 
 function createWindow() {
   // Create the browser window.

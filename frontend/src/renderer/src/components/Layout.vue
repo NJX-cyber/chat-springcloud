@@ -20,15 +20,15 @@
 
     .left-side-inner { 
         width: 250px;
-        background: #f0eeff;
-        border-right: 1px solid #e5e7eb;
+        background: #e6e5e5;
+        border-right: 1px solid #ddd;
         overflow-y: auto;
     }
 
     .right-content {
         flex: 1;
         height: 100%;
-        background: #f8f7ff;
+        background: #f5f5f5;
         width: 100%;
         overflow: hidden;
     }

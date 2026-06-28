@@ -1,11 +1,11 @@
-//重写element plus 全局主题颜色 —— 靛蓝紫主题
+//重写element plus 全局主题颜色 —— 微信绿
 @forward "element-plus/theme-chalk/src/common/var.scss" with (
   $colors: (
-    "primary": ("base": #6366f1),
-    "success": ("base": #10b981),
+    "primary": ("base": #07c160),
+    "success": ("base": #07c160),
     "warning": ("base": #f59e0b),
-    "danger":  ("base": #ef4444),
-    "info":    ("base": #8b5cf6)
+    "danger":  ("base": #fa5151),
+    "info":    ("base": #909399)
   )
 );
 @use "element-plus/theme-chalk/src/index.scss" as *;

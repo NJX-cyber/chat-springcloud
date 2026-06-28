@@ -132,7 +132,7 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .main {
-  background: #f0f0f5;
+  background: #ddd;
   display: flex;
   border-radius: 0 3px 3px 0;
   overflow: hidden;
@@ -140,7 +140,7 @@ onMounted(() => {
 
   .left-side {
     width: 60px;
-    background: linear-gradient(180deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
+    background: #2e2e2e;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -148,85 +148,41 @@ onMounted(() => {
     padding-top: 30px;
     border-right: none;
     padding-bottom: 10px;
-    position: relative;
-
-    /* 细微纹理 */
-    &::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: 
-        radial-gradient(circle at 30% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 70% 80%, rgba(99, 102, 241, 0.06) 0%, transparent 50%);
-      pointer-events: none;
-    }
   }
 
-  /* ===== 头像区 ===== */
   .avatar-section {
     margin-bottom: 15px;
-    position: relative;
-    z-index: 1;
 
     :deep(.avatar) {
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      border-radius: 50%;
-      transition: border-color 0.3s;
-
-      &:hover {
-        border-color: rgba(167, 139, 250, 0.6);
-      }
+      border-radius: 3px;
     }
   }
 
-  /* ===== 菜单列表 ===== */
   .menu-list {
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    position: relative;
-    z-index: 1;
 
     .tab-item {
-      color: #6b6b8a;
+      color: #999;
       width: 40px;
       height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 4px 0;
+      margin: 2px 0;
       cursor: pointer;
-      font-size: 21px;
+      font-size: 22px;
       position: relative;
-      border-radius: 12px;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
       &:hover {
-        color: #a78bfa;
-        background: rgba(139, 92, 246, 0.12);
+        color: #ccc;
       }
-
-      &:active {
-        transform: scale(0.92);
-      }
-    }
-
-    /* 活跃指示器 */
-    .tab-indicator {
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 3px;
-      height: 20px;
-      background: linear-gradient(180deg, #818cf8, #a78bfa);
-      border-radius: 0 3px 3px 0;
     }
 
     .active {
-      color: #c4b5fd !important;
-      background: rgba(139, 92, 246, 0.18) !important;
+      color: #07c160 !important;
     }
   }
 
@@ -242,7 +198,7 @@ onMounted(() => {
   .right-container {
     flex: 1;
     overflow: hidden;
-    background: #f8f7ff;
+    background: #f5f5f5;
   }
 }
 </style>

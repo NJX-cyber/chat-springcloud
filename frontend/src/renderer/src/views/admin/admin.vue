@@ -8,9 +8,6 @@
                 </div>
                 <span class="brand-text">管理控制台</span>
             </div>
-            <div class="header-actions">
-                <span class="admin-badge">Admin</span>
-            </div>
         </div>
 
         <div class="body-content">
@@ -109,173 +106,111 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 .admin-window {
     padding: 0;
-    background: #f0f0f5;
+    border: 1px solid #ddd;
+    background: #fff;
     position: relative;
     overflow: hidden;
     width: 100vw;
     height: 100vh;
-    display: flex;
-    flex-direction: column;
 
-    /* ===== 顶部标题栏 ===== */
     .admin-header {
-        height: 52px;
-        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+        height: 40px;
+        background: #f5f5f5;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0 20px;
+        padding: 0 15px;
         flex-shrink: 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        border-bottom: 1px solid #e0e0e0;
 
         .header-brand {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .brand-icon {
-            width: 34px;
-            height: 34px;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            width: 24px;
+            height: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 
             .iconfont {
-                font-size: 18px;
-                color: #fff;
+                font-size: 16px;
+                color: #333;
             }
         }
 
         .brand-text {
-            font-size: 16px;
-            font-weight: 600;
-            color: #e2e8f0;
-            letter-spacing: 0.5px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
         }
 
         .admin-badge {
-            padding: 4px 14px;
-            border-radius: 20px;
-            background: rgba(139, 92, 246, 0.2);
-            color: #c4b5fd;
             font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            border: 1px solid rgba(139, 92, 246, 0.3);
+            color: #999;
         }
     }
 
     .body-content {
-        flex: 1;
+        height: calc(100% - 40px);
         display: flex;
-        overflow: hidden;
 
-        /* ===== 侧边栏 ===== */
         .left-side {
-            width: 220px;
-            background: #1e1b4b;
-            flex-shrink: 0;
-            overflow-y: auto;
-            position: relative;
-
-            &::after {
-                content: '';
-                position: absolute;
-                right: 0;
-                top: 0;
-                bottom: 0;
-                width: 1px;
-                background: linear-gradient(180deg, 
-                    rgba(139, 92, 246, 0.3) 0%, 
-                    rgba(99, 102, 241, 0.1) 50%, 
-                    rgba(139, 92, 246, 0.3) 100%);
-            }
+            width: 200px;
+            border-right: 1px solid #e0e0e0;
+            background: #f5f5f5;
         }
 
         .side-nav {
-            padding: 12px 10px;
+            padding: 8px 0;
         }
 
         .nav-item {
             display: flex;
             align-items: center;
-            padding: 11px 14px;
-            margin-bottom: 4px;
-            border-radius: 12px;
+            padding: 12px 15px;
             cursor: pointer;
-            position: relative;
-            transition: all 0.2s ease;
 
             &:hover {
-                background: rgba(139, 92, 246, 0.12);
-
-                .nav-icon {
-                    transform: scale(1.05);
-                }
-            }
-
-            &:active {
-                transform: scale(0.98);
+                background: #e8e8e8;
             }
 
             .nav-icon {
-                width: 36px;
-                height: 36px;
-                border-radius: 10px;
+                width: 32px;
+                height: 32px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 flex-shrink: 0;
-                transition: transform 0.2s ease;
 
                 .iconfont {
                     color: #fff;
-                    font-size: 18px;
+                    font-size: 16px;
                 }
             }
 
             .nav-text {
-                margin-left: 12px;
+                margin-left: 10px;
                 font-size: 14px;
-                color: #a5a6c4;
-                font-weight: 500;
-                transition: color 0.2s ease;
+                color: #333;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
             }
-
-            .nav-indicator {
-                position: absolute;
-                right: 0;
-                top: 50%;
-                transform: translateY(-50%);
-                width: 3px;
-                height: 24px;
-                background: linear-gradient(180deg, #818cf8, #a78bfa);
-                border-radius: 3px 0 0 3px;
-            }
         }
 
         .nav-item.active {
-            background: rgba(139, 92, 246, 0.18);
-
-            .nav-text {
-                color: #e2e8f0;
-                font-weight: 600;
-            }
+            background: #ddd;
         }
 
-        /* ===== 右侧内容区 ===== */
         .right-content {
             flex: 1;
-            padding: 20px;
+            padding: 15px;
             overflow-y: auto;
-            background: #f8f7ff;
+            background: #fff;
         }
     }
 }

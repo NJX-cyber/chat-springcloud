@@ -76,7 +76,7 @@ onMounted(() => {
     .iconfont {
         float: left;
         font-size: 12px;
-        color: #6b7280;
+        color: #666;
         text-align: center;
         display: flex;
         justify-content: center;
@@ -84,57 +84,25 @@ onMounted(() => {
         height: 28px;
         align-items: center;
         padding: 0px 10px;
-        transition: all 0.2s ease;
 
         &:hover {
-            background: rgba(0, 0, 0, 0.06);
-            color: #374151;
+            background: #e0e0e0;
         }
     }
 
     .icon-close {
         &:hover {
-            background: #ef4444;
+            background: #fa5151;
             color: #fff;
         }
     }
 
     .win-top {
-        background: rgba(99, 102, 241, 0.08);
-        color: #6366f1;
+        background: #e0e0e0;
+        color: #07c160;
         
         &:hover {
-            background: rgba(99, 102, 241, 0.15);
-            color: #4f46e5;
-        }
-    }
-
-    /* 深色背景模式 */
-    &.dark-bg {
-        .iconfont {
-            color: rgba(255, 255, 255, 0.7);
-
-            &:hover {
-                background: rgba(255, 255, 255, 0.1);
-                color: #fff;
-            }
-        }
-
-        .icon-close {
-            &:hover {
-                background: #ef4444;
-                color: #fff;
-            }
-        }
-
-        .win-top {
-            background: rgba(139, 92, 246, 0.25);
-            color: #c4b5fd;
-            
-            &:hover {
-                background: rgba(139, 92, 246, 0.35);
-                color: #e2e8f0;
-            }
+            background: #d5d5d5;
         }
     }
 }
